@@ -1,0 +1,12 @@
+package: oapi
+output: ./internal/api/oapi/oapi.gen.go
+output-options:
+  nullable-type: false
+  skip-prune: false
+
+generate:
+  gorilla-server: true
+  models: true
+  strict-server: true
+  client: false
+  embedded-spec: true

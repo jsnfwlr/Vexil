@@ -1,0 +1,1271 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Vexil Feature Flag API"
+  },
+  "paths": {
+    "/api/flag": {
+      "options": {
+        "operationId": "options_flag",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "get": {
+        "operationId": "bulk_flags",
+        "summary": "Get bulk list of flags",
+        "description": "Get a paginated bulk list of flags, with search filter and ability to list deleted flags.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pagination_page_number"
+          },
+          {
+            "$ref": "#/components/parameters/pagination_page_size"
+          },
+          {
+            "$ref": "#/components/parameters/pagination_sort_by"
+          },
+          {
+            "$ref": "#/components/parameters/pagination_sort_direction"
+          },
+          {
+            "$ref": "#/components/parameters/filter_by_name"
+          },
+          {
+            "$ref": "#/components/parameters/filter_by_type"
+          },
+          {
+            "$ref": "#/components/parameters/filter_by_environment"
+          },
+          {
+            "$ref": "#/components/parameters/filter_by_state"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Records retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/flag"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "Not Acceptable - No records found matching the filter criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to list flags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "create_flag",
+        "summary": "Create a new flag",
+        "description": "Create a new feature flag with the specified name, type, default value, and environment values.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/flag"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Flag created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/flag"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Flag with the same name already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to create flags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/flag/{flag_id}": {
+      "options": {
+        "operationId": "options_flag_id",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/flag_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_flag",
+        "summary": "Delete a flag",
+        "description": "Soft delete a feature flag by its Id. The flag will be marked as deleted but not removed from the database.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/flag_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Flag deleted successfully"
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "Flag not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to delete flags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "update_flag",
+        "summary": "Update a flag",
+        "description": "Update an existing feature flag's name, type, default value, and environment values.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/flag_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/flag"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Flag updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/flag"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "Flag not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to update flags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/environment": {
+      "options": {
+        "operationId": "options_environment",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "get": {
+        "operationId": "list_environments",
+        "summary": "List environments",
+        "description": "Get a list of all environment names",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pagination_page_number"
+          },
+          {
+            "$ref": "#/components/parameters/pagination_page_size"
+          },
+          {
+            "$ref": "#/components/parameters/pagination_sort_by"
+          },
+          {
+            "$ref": "#/components/parameters/pagination_sort_direction"
+          },
+          {
+            "$ref": "#/components/parameters/filter_by_name"
+          },
+          {
+            "$ref": "#/components/parameters/filter_by_type"
+          },
+          {
+            "$ref": "#/components/parameters/filter_by_state"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Records retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/flag"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "Not Acceptable - No records found matching the filter criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to create environments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "create_environment",
+        "summary": "Create a new environment",
+        "description": "Create a new environment with the specified name.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the environment"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Environment created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/environment"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Environment with the same name already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to create environments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/environment/{environment_name}": {
+      "options": {
+        "operationId": "options_environment_name",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/environment_name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "delete_environment",
+        "summary": "Delete an environment",
+        "description": "Soft delete an environment by its name. The environment will be marked as deleted but not removed from the database.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/environment_name"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Environment deleted successfully"
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "Environment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to delete environments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/environment/{environment_name}/flag": {
+      "options": {
+        "operationId": "options_environment_name_flag",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/environment_name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "get": {
+        "operationId": "get_flags_by_environment",
+        "summary": "Get flags by environment",
+        "description": "Get all flags for a specific environment by its name.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/environment_name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Flags retrieved successfully for the environment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/environment_flag"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "Environment not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to view environment flags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/environment/{environment_name}/flag/{flag_id}": {
+      "options": {
+        "operationId": "options_environment_name_flag_id",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/environment_name"
+          },
+          {
+            "$ref": "#/components/parameters/flag_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "put": {
+        "operationId": "update_environment_flag_value",
+        "summary": "Update a flag in an environment",
+        "description": "Update the value of a specific flag in a specific environment.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/environment_name"
+          },
+          {
+            "$ref": "#/components/parameters/flag_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/environment_flag"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Flag updated successfully in the environment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/flag"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "Environment or flag not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to update flags in this environment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/healthcheck": {
+      "options": {
+        "operationId": "options_health_check",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "get": {
+        "operationId": "health_check",
+        "summary": "Get health status",
+        "description": "Get the health status of the server.",
+        "responses": {
+          "200": {
+            "description": "Health check successful"
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui": {
+      "options": {
+        "operationId": "options_ui",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "get": {
+        "operationId": "get_ui_index",
+        "summary": "Get the index.html for the UI",
+        "description": "Serve the static index.html for the Web UI",
+        "responses": {
+          "200": {
+            "description": "UI retrieved successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui/{file}": {
+      "options": {
+        "operationId": "options_ui_file",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "get": {
+        "operationId": "get_ui_file",
+        "summary": "Get the static files for the UI",
+        "description": "Serve the static files for the Web UI",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "UI retrieved successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found - The requested UI resource does not exist",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "error_body": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message describing the issue"
+          },
+          "error_code": {
+            "type": "integer"
+          }
+        }
+      },
+      "flag_type": {
+        "type": "string",
+        "enum": [
+          "boolean",
+          "string",
+          "integer",
+          "string_slice",
+          "integer_slice",
+          "json"
+        ]
+      },
+      "flag": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "default_value"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "flag_type": {
+            "$ref": "#/components/schemas/flag_type"
+          },
+          "default_value": {
+            "type": "string"
+          },
+          "environments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "environment_name",
+                "flag_value"
+              ],
+              "properties": {
+                "environment_name": {
+                  "type": "string"
+                },
+                "flag_value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "environment_flag": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "value"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/flag_type"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "environment": {
+        "type": "object",
+        "required": [
+          "name",
+          "flags"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/flag"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      }
+    },
+    "parameters": {
+      "pagination_page_number": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        },
+        "description": "Page number for pagination. Defaults to 1 if not provided. Must be a positive integer."
+      },
+      "pagination_page_size": {
+        "name": "size",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "default": 100,
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "description": "Number of items per page for pagination. Valid values range from 1-1000. Defaults to 100 if not provided."
+      },
+      "pagination_sort_by": {
+        "name": "sort_by",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "default": "name",
+          "enum": [
+            "name",
+            "type",
+            "value",
+            "default_value",
+            "environment",
+            "created_at",
+            "updated_at",
+            "deleted_at"
+          ]
+        },
+        "description": "Sort by field for the pagination. If not provided, defaults to 'name'."
+      },
+      "pagination_sort_direction": {
+        "name": "sort_direction",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "default": "asc",
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        },
+        "description": "Sort direction for the pagination. If not provided, defaults to 'asc'."
+      },
+      "filter_by_name": {
+        "name": "name",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "default": ""
+        },
+        "description": "Filter records by with the provided string in the name. If not provided, no name filtering is applied."
+      },
+      "filter_by_type": {
+        "name": "type",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "$ref": "#/components/schemas/flag_type"
+        },
+        "description": "Filter records by type. If not provided, no type filtering is applied."
+      },
+      "filter_by_environment": {
+        "name": "environment",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "default": ""
+        },
+        "description": "Filter records by environment name. If not provided, no environment filtering is applied."
+      },
+      "filter_by_state": {
+        "name": "state",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "default": "active",
+          "enum": [
+            "active",
+            "deleted",
+            "all"
+          ]
+        },
+        "description": "Filter records by state. 'active' for non-deleted records, 'deleted' for soft-deleted records, 'all' for both. Defaults to 'active'"
+      },
+      "filter_by_datetime_type": {
+        "name": "datetime_type",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "default": "",
+          "enum": [
+            "created_at",
+            "updated_at",
+            "deleted_at"
+          ]
+        },
+        "description": "Filter list by this datetime field. If not provided, no datetime filtering is applied."
+      },
+      "filter_by_datetime_direction": {
+        "name": "datetime_direction",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "default": "after",
+          "enum": [
+            "after",
+            "before"
+          ]
+        },
+        "description": "Filter after/before the datetime field. Defaults to 'after'."
+      },
+      "filter_by_datetime_value": {
+        "name": "datetime_value",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "format": "date-time",
+          "default": ""
+        },
+        "description": "The datetime value to filter by. Must be in ISO 8601 format. If not provided, no datetime filtering is applied."
+      },
+      "flag_id": {
+        "name": "flag_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "description": "The unique identifier of the flag."
+      },
+      "environment_id": {
+        "name": "environment_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "description": "The unique identifier of the environment."
+      },
+      "environment_name": {
+        "name": "environment_name",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The name of the environment."
+      },
+      "file": {
+        "name": "file",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The path for the UI static files."
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+version: "2"
+sql:
+  - schema: "migrations"
+    queries:
+      - "queries/features.sql"
+    engine: "postgresql"
+    gen:
+      go:
+        sql_package: "pgx/v5"
+        out: "../../internal/db"
+        emit_interface: true
+        output_models_file_name: "models.gen.go"
+        output_querier_file_name: "querier.gen.go"
+        output_db_file_name: "db.gen.go"
+    database:
+      uri: "postgres://vexil:vexil@localhost:5433/vexil?sslmode=disable"
