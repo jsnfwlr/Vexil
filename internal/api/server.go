@@ -27,7 +27,6 @@ type Server struct {
 }
 
 func errorHandler(w http.ResponseWriter, r *http.Request, err error) {
-	var statusCode int
 	var body []byte
 
 	ctx := r.Context()
@@ -43,12 +42,12 @@ func errorHandler(w http.ResponseWriter, r *http.Request, err error) {
 
 	body, _ = json.Marshal(e)
 
-	o.Error(errors.New("error handling request"), log.RequestBodyKey, body)
-	w.WriteHeader(e.Status())
-	http.Error(w, string(body), statusCode)
+	o.Error(errors.New("error handling request"), log.RequestBodyKey, string(body))
+
+	http.Error(w, string(body), e.Code)
 }
 
-func New(ctx context.Context, cfg Config) Server {
+func New(ctx context.Context, cfg Config) (server Server, fault error) {
 	r := mux.NewRouter()
 
 	mw := []mux.MiddlewareFunc{
@@ -61,33 +60,39 @@ func New(ctx context.Context, cfg Config) Server {
 	_, o := o11y.Get(ctx, nil)
 	o.Debug("creating base router")
 
-	h := handlers.New(cfg.DBClient, cfg.EnableSSE)
+	h, err := handlers.New(ctx, cfg.DBClient, cfg.EnableSSE, "static", "index.html")
+	if err != nil {
+		return Server{}, err
+	}
 
-	a := oapi.NewStrictHandlerWithOptions(h, nil, oapi.StrictHTTPServerOptions{
+	api := oapi.NewStrictHandlerWithOptions(h, nil, oapi.StrictHTTPServerOptions{
 		RequestErrorHandlerFunc:  errorHandler,
 		ResponseErrorHandlerFunc: errorHandler,
 	})
 
-	oapi.HandlerFromMux(a, r)
-
-	m := http.NewServeMux()
-	m.Handle("/", r)
-
 	if cfg.EnableSSE {
 		o.Debug("enabling server-sent events")
-		m.HandleFunc("/api/events", h.Events)
-		m.HandleFunc("/api/event", h.PublishEvent)
+		r.HandleFunc("/api/events", h.Events)
+		r.HandleFunc("/api/event", h.PublishEvent)
 	}
+	r.Path("/").Name("ui-index").Methods(http.MethodGet).HandlerFunc(h.UI)
+	r.PathPrefix("/js").Name("ui-js").Methods(http.MethodGet).HandlerFunc(h.UI)
+	r.PathPrefix("/css").Name("ui-css").Methods(http.MethodGet).HandlerFunc(h.UI)
+	r.Path("/favicon.ico").Name("ui-favicon").Methods(http.MethodGet).HandlerFunc(h.UI)
 
-	s := &http.Server{
+	oh := oapi.HandlerFromMux(api, r)
+
+	core := &http.Server{
 		Addr:                         fmt.Sprintf("%s:%d", Address, Port),
 		DisableGeneralOptionsHandler: true,
-		Handler:                      m,
+		Handler:                      oh,
 	}
 
-	return Server{
-		server: s,
+	s := Server{
+		server: core,
 	}
+
+	return s, nil
 }
 
 func (srvr *Server) Start(ctx context.Context) error {

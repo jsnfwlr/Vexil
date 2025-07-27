@@ -17,3 +17,7 @@ gen-db:
 gen-api:
 	@echo "Generating API..."
 	@go tool oapi-codegen -config ./etc/api/server.yaml ./etc/api/spec.jsonc
+
+gen-ui:
+	@echo "Generating UI..."
+	@cd ui && pnpm generate

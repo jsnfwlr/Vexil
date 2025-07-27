@@ -4,9 +4,9 @@ import (
 	"context"
 	"os"
 
+	"github.com/jsnfwlr/vexil/internal/cmd/curl"
 	"github.com/jsnfwlr/vexil/internal/cmd/daemon"
 	"github.com/jsnfwlr/vexil/internal/cmd/database"
-	"github.com/jsnfwlr/vexil/internal/cmd/event"
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
@@ -38,5 +38,5 @@ func init() {
 
 	RootCmd.AddCommand(daemon.BaseCmd)
 	RootCmd.AddCommand(database.BaseCmd)
-	RootCmd.AddCommand(event.BaseCmd)
+	RootCmd.AddCommand(curl.BaseCmd)
 }

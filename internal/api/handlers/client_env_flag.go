@@ -2,35 +2,60 @@ package handlers
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
+	"github.com/jsnfwlr/o11y"
 	"github.com/jsnfwlr/vexil/internal/api/oapi"
+	"github.com/jsnfwlr/vexil/internal/db"
+	"github.com/jsnfwlr/vexil/internal/log"
 )
 
-// GetFlagsByEnvironment Get flags by environment (GET /api/environment/{environment_name}/flag)
-func (s Server) GetFlagsByEnvironment(ctx context.Context, r oapi.GetFlagsByEnvironmentRequestObject) (res oapi.GetFlagsByEnvironmentResponseObject, fault error) {
-	return doGetFlagsByEnvironment(ctx, r)
+type FlagsByEnvQueryProvider interface {
+	GetFlagsByEnvironmentName(ctx context.Context, name string) ([]db.GetFlagsByEnvironmentNameRow, error)
 }
 
-func doGetFlagsByEnvironment(ctx context.Context, r oapi.GetFlagsByEnvironmentRequestObject) (res oapi.GetFlagsByEnvironmentResponseObject, fault error) {
+func doGetFlagsByEnvironment(ctx context.Context, q FlagsByEnvQueryProvider, r oapi.GetFlagsByEnvironmentRequestObject) (res oapi.GetFlagsByEnvironmentResponseObject, fault error) {
 	var out oapi.GetFlagsByEnvironment200JSONResponse
 
-	out = append(out, oapi.EnvironmentFlag{
-		Name:  "FIRST_STRING",
-		Type:  "string",
-		Value: "13cm of thirty stand green wool",
-	})
-	out = append(out, oapi.EnvironmentFlag{
-		Name:  "SECOND_STRING",
-		Type:  "string",
-		Value: "30cm of three stand blue cotton",
-	})
+	ctx, o := o11y.Get(ctx, nil)
+
+	rows, err := q.GetFlagsByEnvironmentName(ctx, r.EnvironmentName)
+	if err != nil {
+		o.Error(err, log.EnvironmentNameKey, r.EnvironmentName)
+		return oapi.GetFlagsByEnvironment400JSONResponse{
+			Error:     err.Error(),
+			ErrorCode: http.StatusBadRequest,
+		}, err
+	}
+
+	if len(rows) == 0 {
+		err = fmt.Errorf("no flags found for %s", r.EnvironmentName)
+		return oapi.GetFlagsByEnvironment400JSONResponse{
+			Error:     err.Error(),
+			ErrorCode: http.StatusBadRequest,
+		}, err
+	}
+
+	for _, f := range rows {
+		vt, err := f.FeatureFlag.ValueType.ToAPIEnum()
+		if err != nil {
+			o.Error(err, log.EnvironmentNameKey, r.EnvironmentName)
+			return oapi.GetFlagsByEnvironment500JSONResponse{
+				Error:     err.Error(),
+				ErrorCode: http.StatusInternalServerError,
+			}, err
+		}
+		of := oapi.EnvironmentFlag{
+			Name:  f.FeatureFlag.Name,
+			Type:  vt,
+			Value: f.FeatureFlagValue.Value,
+		}
+
+		out = append(out, of)
+	}
 
 	return out, nil
-}
-
-// OptionsEnvironmentNameFlag Check the options for the endpoint (OPTIONS /api/environment/{environment_name}/flag)
-func (s Server) OptionsEnvironmentNameFlag(ctx context.Context, r oapi.OptionsEnvironmentNameFlagRequestObject) (res oapi.OptionsEnvironmentNameFlagResponseObject, fault error) {
-	return doOptionsEnvironmentNameFlag(ctx, r)
 }
 
 func doOptionsEnvironmentNameFlag(ctx context.Context, r oapi.OptionsEnvironmentNameFlagRequestObject) (res oapi.OptionsEnvironmentNameFlagResponseObject, fault error) {

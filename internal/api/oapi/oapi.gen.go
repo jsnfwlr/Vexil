@@ -97,15 +97,40 @@ const (
 
 // Defines values for BulkFlagsParamsSortDirection.
 const (
-	Asc  BulkFlagsParamsSortDirection = "asc"
-	Desc BulkFlagsParamsSortDirection = "desc"
+	BulkFlagsParamsSortDirectionAsc  BulkFlagsParamsSortDirection = "asc"
+	BulkFlagsParamsSortDirectionDesc BulkFlagsParamsSortDirection = "desc"
 )
 
 // Defines values for BulkFlagsParamsState.
 const (
-	Active  BulkFlagsParamsState = "active"
-	All     BulkFlagsParamsState = "all"
-	Deleted BulkFlagsParamsState = "deleted"
+	BulkFlagsParamsStateActive  BulkFlagsParamsState = "active"
+	BulkFlagsParamsStateAll     BulkFlagsParamsState = "all"
+	BulkFlagsParamsStateDeleted BulkFlagsParamsState = "deleted"
+)
+
+// Defines values for UIFindBulkFlagsParamsSortBy.
+const (
+	UIFindBulkFlagsParamsSortByCreatedAt    UIFindBulkFlagsParamsSortBy = "created_at"
+	UIFindBulkFlagsParamsSortByDefaultValue UIFindBulkFlagsParamsSortBy = "default_value"
+	UIFindBulkFlagsParamsSortByDeletedAt    UIFindBulkFlagsParamsSortBy = "deleted_at"
+	UIFindBulkFlagsParamsSortByEnvironment  UIFindBulkFlagsParamsSortBy = "environment"
+	UIFindBulkFlagsParamsSortByName         UIFindBulkFlagsParamsSortBy = "name"
+	UIFindBulkFlagsParamsSortByType         UIFindBulkFlagsParamsSortBy = "type"
+	UIFindBulkFlagsParamsSortByUpdatedAt    UIFindBulkFlagsParamsSortBy = "updated_at"
+	UIFindBulkFlagsParamsSortByValue        UIFindBulkFlagsParamsSortBy = "value"
+)
+
+// Defines values for UIFindBulkFlagsParamsSortDirection.
+const (
+	UIFindBulkFlagsParamsSortDirectionAsc  UIFindBulkFlagsParamsSortDirection = "asc"
+	UIFindBulkFlagsParamsSortDirectionDesc UIFindBulkFlagsParamsSortDirection = "desc"
+)
+
+// Defines values for UIFindBulkFlagsParamsState.
+const (
+	UIFindBulkFlagsParamsStateActive  UIFindBulkFlagsParamsState = "active"
+	UIFindBulkFlagsParamsStateAll     UIFindBulkFlagsParamsState = "all"
+	UIFindBulkFlagsParamsStateDeleted UIFindBulkFlagsParamsState = "deleted"
 )
 
 // Environment defines model for environment.
@@ -128,8 +153,8 @@ type EnvironmentFlag struct {
 // ErrorBody defines model for error_body.
 type ErrorBody struct {
 	// Error Error message describing the issue
-	Error     *string `json:"error,omitempty"`
-	ErrorCode *int    `json:"error_code,omitempty"`
+	Error     string `json:"error"`
+	ErrorCode int    `json:"error_code"`
 }
 
 // Flag defines model for flag.
@@ -141,9 +166,9 @@ type Flag struct {
 		EnvironmentName string `json:"environment_name"`
 		FlagValue       string `json:"flag_value"`
 	} `json:"environments,omitempty"`
-	FlagType  *FlagType  `json:"flag_type,omitempty"`
 	Id        *int64     `json:"id,omitempty"`
 	Name      string     `json:"name"`
+	Type      FlagType   `json:"type"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
@@ -152,9 +177,6 @@ type FlagType string
 
 // EnvironmentName defines model for environment_name.
 type EnvironmentName = string
-
-// File defines model for file.
-type File = string
 
 // FilterByEnvironment defines model for filter_by_environment.
 type FilterByEnvironment = string
@@ -258,6 +280,42 @@ type BulkFlagsParamsSortDirection string
 // BulkFlagsParamsState defines parameters for BulkFlags.
 type BulkFlagsParamsState string
 
+// UIFindBulkFlagsParams defines parameters for UIFindBulkFlags.
+type UIFindBulkFlagsParams struct {
+	// Page Page number for pagination. Defaults to 1 if not provided. Must be a positive integer.
+	Page *PaginationPageNumber `form:"page,omitempty" json:"page,omitempty"`
+
+	// Size Number of items per page for pagination. Valid values range from 1-1000. Defaults to 100 if not provided.
+	Size *PaginationPageSize `form:"size,omitempty" json:"size,omitempty"`
+
+	// SortBy Sort by field for the pagination. If not provided, defaults to 'name'.
+	SortBy *UIFindBulkFlagsParamsSortBy `form:"sort_by,omitempty" json:"sort_by,omitempty"`
+
+	// SortDirection Sort direction for the pagination. If not provided, defaults to 'asc'.
+	SortDirection *UIFindBulkFlagsParamsSortDirection `form:"sort_direction,omitempty" json:"sort_direction,omitempty"`
+
+	// Name Filter records by with the provided string in the name. If not provided, no name filtering is applied.
+	Name *FilterByName `form:"name,omitempty" json:"name,omitempty"`
+
+	// Type Filter records by type. If not provided, no type filtering is applied.
+	Type *FilterByType `form:"type,omitempty" json:"type,omitempty"`
+
+	// Environment Filter records by environment name. If not provided, no environment filtering is applied.
+	Environment *FilterByEnvironment `form:"environment,omitempty" json:"environment,omitempty"`
+
+	// State Filter records by state. 'active' for non-deleted records, 'deleted' for soft-deleted records, 'all' for both. Defaults to 'active'
+	State *UIFindBulkFlagsParamsState `form:"state,omitempty" json:"state,omitempty"`
+}
+
+// UIFindBulkFlagsParamsSortBy defines parameters for UIFindBulkFlags.
+type UIFindBulkFlagsParamsSortBy string
+
+// UIFindBulkFlagsParamsSortDirection defines parameters for UIFindBulkFlags.
+type UIFindBulkFlagsParamsSortDirection string
+
+// UIFindBulkFlagsParamsState defines parameters for UIFindBulkFlags.
+type UIFindBulkFlagsParamsState string
+
 // CreateEnvironmentJSONRequestBody defines body for CreateEnvironment for application/json ContentType.
 type CreateEnvironmentJSONRequestBody CreateEnvironmentJSONBody
 
@@ -323,18 +381,27 @@ type ServerInterface interface {
 	// Check the options for the endpoint
 	// (OPTIONS /healthcheck)
 	OptionsHealthCheck(w http.ResponseWriter, r *http.Request)
-	// Get the index.html for the UI
-	// (GET /ui)
-	GetUiIndex(w http.ResponseWriter, r *http.Request)
 	// Check the options for the endpoint
-	// (OPTIONS /ui)
-	OptionsUi(w http.ResponseWriter, r *http.Request)
-	// Get the static files for the UI
-	// (GET /ui/{file})
-	GetUiFile(w http.ResponseWriter, r *http.Request, file File)
+	// (OPTIONS /ui/flag)
+	UIOptionsCreateSingleFlag(w http.ResponseWriter, r *http.Request)
+	// create a single flag
+	// (POST /ui/flag)
+	UICreateSingleFlag(w http.ResponseWriter, r *http.Request)
+	// delete a single flag
+	// (DELETE /ui/flag/{flag_id})
+	UIKillSingleFlag(w http.ResponseWriter, r *http.Request, flagId FlagId)
 	// Check the options for the endpoint
-	// (OPTIONS /ui/{file})
-	OptionsUiFile(w http.ResponseWriter, r *http.Request, file File)
+	// (OPTIONS /ui/flag/{flag_id})
+	UIOptionsSingleFlag(w http.ResponseWriter, r *http.Request, flagId FlagId)
+	// update a single flag
+	// (POST /ui/flag/{flag_id})
+	UIUpdateSingleFlag(w http.ResponseWriter, r *http.Request, flagId FlagId)
+	// Get bulk list of flags
+	// (GET /ui/flags)
+	UIFindBulkFlags(w http.ResponseWriter, r *http.Request, params UIFindBulkFlagsParams)
+	// Check the options for the endpoint
+	// (OPTIONS /ui/flags)
+	UIOptionsFindBulkFlags(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -831,11 +898,11 @@ func (siw *ServerInterfaceWrapper) OptionsHealthCheck(w http.ResponseWriter, r *
 	handler.ServeHTTP(w, r)
 }
 
-// GetUiIndex operation middleware
-func (siw *ServerInterfaceWrapper) GetUiIndex(w http.ResponseWriter, r *http.Request) {
+// UIOptionsCreateSingleFlag operation middleware
+func (siw *ServerInterfaceWrapper) UIOptionsCreateSingleFlag(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetUiIndex(w, r)
+		siw.Handler.UIOptionsCreateSingleFlag(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -845,11 +912,11 @@ func (siw *ServerInterfaceWrapper) GetUiIndex(w http.ResponseWriter, r *http.Req
 	handler.ServeHTTP(w, r)
 }
 
-// OptionsUi operation middleware
-func (siw *ServerInterfaceWrapper) OptionsUi(w http.ResponseWriter, r *http.Request) {
+// UICreateSingleFlag operation middleware
+func (siw *ServerInterfaceWrapper) UICreateSingleFlag(w http.ResponseWriter, r *http.Request) {
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.OptionsUi(w, r)
+		siw.Handler.UICreateSingleFlag(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -859,22 +926,22 @@ func (siw *ServerInterfaceWrapper) OptionsUi(w http.ResponseWriter, r *http.Requ
 	handler.ServeHTTP(w, r)
 }
 
-// GetUiFile operation middleware
-func (siw *ServerInterfaceWrapper) GetUiFile(w http.ResponseWriter, r *http.Request) {
+// UIKillSingleFlag operation middleware
+func (siw *ServerInterfaceWrapper) UIKillSingleFlag(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
-	// ------------- Path parameter "file" -------------
-	var file File
+	// ------------- Path parameter "flag_id" -------------
+	var flagId FlagId
 
-	err = runtime.BindStyledParameterWithOptions("simple", "file", mux.Vars(r)["file"], &file, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "flag_id", mux.Vars(r)["flag_id"], &flagId, runtime.BindStyledParameterOptions{Explode: false, Required: true})
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "file", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "flag_id", Err: err})
 		return
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.GetUiFile(w, r, file)
+		siw.Handler.UIKillSingleFlag(w, r, flagId)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -884,22 +951,144 @@ func (siw *ServerInterfaceWrapper) GetUiFile(w http.ResponseWriter, r *http.Requ
 	handler.ServeHTTP(w, r)
 }
 
-// OptionsUiFile operation middleware
-func (siw *ServerInterfaceWrapper) OptionsUiFile(w http.ResponseWriter, r *http.Request) {
+// UIOptionsSingleFlag operation middleware
+func (siw *ServerInterfaceWrapper) UIOptionsSingleFlag(w http.ResponseWriter, r *http.Request) {
 
 	var err error
 
-	// ------------- Path parameter "file" -------------
-	var file File
+	// ------------- Path parameter "flag_id" -------------
+	var flagId FlagId
 
-	err = runtime.BindStyledParameterWithOptions("simple", "file", mux.Vars(r)["file"], &file, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	err = runtime.BindStyledParameterWithOptions("simple", "flag_id", mux.Vars(r)["flag_id"], &flagId, runtime.BindStyledParameterOptions{Explode: false, Required: true})
 	if err != nil {
-		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "file", Err: err})
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "flag_id", Err: err})
 		return
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.OptionsUiFile(w, r, file)
+		siw.Handler.UIOptionsSingleFlag(w, r, flagId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UIUpdateSingleFlag operation middleware
+func (siw *ServerInterfaceWrapper) UIUpdateSingleFlag(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// ------------- Path parameter "flag_id" -------------
+	var flagId FlagId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "flag_id", mux.Vars(r)["flag_id"], &flagId, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "flag_id", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UIUpdateSingleFlag(w, r, flagId)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UIFindBulkFlags operation middleware
+func (siw *ServerInterfaceWrapper) UIFindBulkFlags(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params UIFindBulkFlagsParams
+
+	// ------------- Optional query parameter "page" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "page", r.URL.Query(), &params.Page)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "page", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "size" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "size", r.URL.Query(), &params.Size)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "size", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort_by" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort_by", r.URL.Query(), &params.SortBy)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort_by", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "sort_direction" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "sort_direction", r.URL.Query(), &params.SortDirection)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "sort_direction", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "name" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "name", r.URL.Query(), &params.Name)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "name", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "type" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "type", r.URL.Query(), &params.Type)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "type", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "environment" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "environment", r.URL.Query(), &params.Environment)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "environment", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "state" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "state", r.URL.Query(), &params.State)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "state", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UIFindBulkFlags(w, r, params)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// UIOptionsFindBulkFlags operation middleware
+func (siw *ServerInterfaceWrapper) UIOptionsFindBulkFlags(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.UIOptionsFindBulkFlags(w, r)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -1056,13 +1245,19 @@ func HandlerWithOptions(si ServerInterface, options GorillaServerOptions) http.H
 
 	r.HandleFunc(options.BaseURL+"/healthcheck", wrapper.OptionsHealthCheck).Methods("OPTIONS")
 
-	r.HandleFunc(options.BaseURL+"/ui", wrapper.GetUiIndex).Methods("GET")
+	r.HandleFunc(options.BaseURL+"/ui/flag", wrapper.UIOptionsCreateSingleFlag).Methods("OPTIONS")
 
-	r.HandleFunc(options.BaseURL+"/ui", wrapper.OptionsUi).Methods("OPTIONS")
+	r.HandleFunc(options.BaseURL+"/ui/flag", wrapper.UICreateSingleFlag).Methods("POST")
 
-	r.HandleFunc(options.BaseURL+"/ui/{file}", wrapper.GetUiFile).Methods("GET")
+	r.HandleFunc(options.BaseURL+"/ui/flag/{flag_id}", wrapper.UIKillSingleFlag).Methods("DELETE")
 
-	r.HandleFunc(options.BaseURL+"/ui/{file}", wrapper.OptionsUiFile).Methods("OPTIONS")
+	r.HandleFunc(options.BaseURL+"/ui/flag/{flag_id}", wrapper.UIOptionsSingleFlag).Methods("OPTIONS")
+
+	r.HandleFunc(options.BaseURL+"/ui/flag/{flag_id}", wrapper.UIUpdateSingleFlag).Methods("POST")
+
+	r.HandleFunc(options.BaseURL+"/ui/flags", wrapper.UIFindBulkFlags).Methods("GET")
+
+	r.HandleFunc(options.BaseURL+"/ui/flags", wrapper.UIOptionsFindBulkFlags).Methods("OPTIONS")
 
 	return r
 }
@@ -1084,9 +1279,7 @@ func (response ListEnvironments200JSONResponse) VisitListEnvironmentsResponse(w 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type ListEnvironments400JSONResponse struct {
-	Error *string `json:"error,omitempty"`
-}
+type ListEnvironments400JSONResponse ErrorBody
 
 func (response ListEnvironments400JSONResponse) VisitListEnvironmentsResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
@@ -1291,6 +1484,15 @@ type GetFlagsByEnvironment200JSONResponse []EnvironmentFlag
 func (response GetFlagsByEnvironment200JSONResponse) VisitGetFlagsByEnvironmentResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type GetFlagsByEnvironment400JSONResponse ErrorBody
+
+func (response GetFlagsByEnvironment400JSONResponse) VisitGetFlagsByEnvironmentResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
@@ -1743,70 +1945,34 @@ func (response OptionsHealthCheck200Response) VisitOptionsHealthCheckResponse(w 
 	return nil
 }
 
-type GetUiIndexRequestObject struct {
+type UIOptionsCreateSingleFlagRequestObject struct {
 }
 
-type GetUiIndexResponseObject interface {
-	VisitGetUiIndexResponse(w http.ResponseWriter) error
+type UIOptionsCreateSingleFlagResponseObject interface {
+	VisitUIOptionsCreateSingleFlagResponse(w http.ResponseWriter) error
 }
 
-type GetUiIndex200TexthtmlResponse struct {
-	Body          io.Reader
-	ContentLength int64
+type UIOptionsCreateSingleFlag200Response struct {
 }
 
-func (response GetUiIndex200TexthtmlResponse) VisitGetUiIndexResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "text/html")
-	if response.ContentLength != 0 {
-		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
-	}
-	w.WriteHeader(200)
-
-	if closer, ok := response.Body.(io.ReadCloser); ok {
-		defer closer.Close()
-	}
-	_, err := io.Copy(w, response.Body)
-	return err
-}
-
-type GetUiIndex500JSONResponse ErrorBody
-
-func (response GetUiIndex500JSONResponse) VisitGetUiIndexResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(500)
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-type OptionsUiRequestObject struct {
-}
-
-type OptionsUiResponseObject interface {
-	VisitOptionsUiResponse(w http.ResponseWriter) error
-}
-
-type OptionsUi200Response struct {
-}
-
-func (response OptionsUi200Response) VisitOptionsUiResponse(w http.ResponseWriter) error {
+func (response UIOptionsCreateSingleFlag200Response) VisitUIOptionsCreateSingleFlagResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
 	return nil
 }
 
-type GetUiFileRequestObject struct {
-	File File `json:"file"`
+type UICreateSingleFlagRequestObject struct {
 }
 
-type GetUiFileResponseObject interface {
-	VisitGetUiFileResponse(w http.ResponseWriter) error
+type UICreateSingleFlagResponseObject interface {
+	VisitUICreateSingleFlagResponse(w http.ResponseWriter) error
 }
 
-type GetUiFile200TexthtmlResponse struct {
+type UICreateSingleFlag200TexthtmlResponse struct {
 	Body          io.Reader
 	ContentLength int64
 }
 
-func (response GetUiFile200TexthtmlResponse) VisitGetUiFileResponse(w http.ResponseWriter) error {
+func (response UICreateSingleFlag200TexthtmlResponse) VisitUICreateSingleFlagResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "text/html")
 	if response.ContentLength != 0 {
 		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
@@ -1820,36 +1986,443 @@ func (response GetUiFile200TexthtmlResponse) VisitGetUiFileResponse(w http.Respo
 	return err
 }
 
-type GetUiFile404JSONResponse ErrorBody
+type UICreateSingleFlag400JSONResponse struct {
+	Error *string `json:"error,omitempty"`
+}
 
-func (response GetUiFile404JSONResponse) VisitGetUiFileResponse(w http.ResponseWriter) error {
+func (response UICreateSingleFlag400JSONResponse) VisitUICreateSingleFlagResponse(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(404)
+	w.WriteHeader(400)
 
 	return json.NewEncoder(w).Encode(response)
 }
 
-type GetUiFile500JSONResponse ErrorBody
+type UICreateSingleFlag401TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
 
-func (response GetUiFile500JSONResponse) VisitGetUiFileResponse(w http.ResponseWriter) error {
-	w.Header().Set("Content-Type", "application/json")
+func (response UICreateSingleFlag401TexthtmlResponse) VisitUICreateSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(401)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UICreateSingleFlag403TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UICreateSingleFlag403TexthtmlResponse) VisitUICreateSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(403)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UICreateSingleFlag500TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UICreateSingleFlag500TexthtmlResponse) VisitUICreateSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
 	w.WriteHeader(500)
 
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIKillSingleFlagRequestObject struct {
+	FlagId FlagId `json:"flag_id"`
+}
+
+type UIKillSingleFlagResponseObject interface {
+	VisitUIKillSingleFlagResponse(w http.ResponseWriter) error
+}
+
+type UIKillSingleFlag200TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIKillSingleFlag200TexthtmlResponse) VisitUIKillSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIKillSingleFlag400JSONResponse struct {
+	Error *string `json:"error,omitempty"`
+}
+
+func (response UIKillSingleFlag400JSONResponse) VisitUIKillSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
 	return json.NewEncoder(w).Encode(response)
 }
 
-type OptionsUiFileRequestObject struct {
-	File File `json:"file"`
+type UIKillSingleFlag401TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
 }
 
-type OptionsUiFileResponseObject interface {
-	VisitOptionsUiFileResponse(w http.ResponseWriter) error
+func (response UIKillSingleFlag401TexthtmlResponse) VisitUIKillSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(401)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
 }
 
-type OptionsUiFile200Response struct {
+type UIKillSingleFlag403TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
 }
 
-func (response OptionsUiFile200Response) VisitOptionsUiFileResponse(w http.ResponseWriter) error {
+func (response UIKillSingleFlag403TexthtmlResponse) VisitUIKillSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(403)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIKillSingleFlag406TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIKillSingleFlag406TexthtmlResponse) VisitUIKillSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(406)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIKillSingleFlag500TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIKillSingleFlag500TexthtmlResponse) VisitUIKillSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(500)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIOptionsSingleFlagRequestObject struct {
+	FlagId FlagId `json:"flag_id"`
+}
+
+type UIOptionsSingleFlagResponseObject interface {
+	VisitUIOptionsSingleFlagResponse(w http.ResponseWriter) error
+}
+
+type UIOptionsSingleFlag200Response struct {
+}
+
+func (response UIOptionsSingleFlag200Response) VisitUIOptionsSingleFlagResponse(w http.ResponseWriter) error {
+	w.WriteHeader(200)
+	return nil
+}
+
+type UIUpdateSingleFlagRequestObject struct {
+	FlagId FlagId `json:"flag_id"`
+}
+
+type UIUpdateSingleFlagResponseObject interface {
+	VisitUIUpdateSingleFlagResponse(w http.ResponseWriter) error
+}
+
+type UIUpdateSingleFlag200TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIUpdateSingleFlag200TexthtmlResponse) VisitUIUpdateSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIUpdateSingleFlag400JSONResponse struct {
+	Error *string `json:"error,omitempty"`
+}
+
+func (response UIUpdateSingleFlag400JSONResponse) VisitUIUpdateSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UIUpdateSingleFlag401TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIUpdateSingleFlag401TexthtmlResponse) VisitUIUpdateSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(401)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIUpdateSingleFlag403TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIUpdateSingleFlag403TexthtmlResponse) VisitUIUpdateSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(403)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIUpdateSingleFlag406TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIUpdateSingleFlag406TexthtmlResponse) VisitUIUpdateSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(406)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIUpdateSingleFlag500TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIUpdateSingleFlag500TexthtmlResponse) VisitUIUpdateSingleFlagResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(500)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIFindBulkFlagsRequestObject struct {
+	Params UIFindBulkFlagsParams
+}
+
+type UIFindBulkFlagsResponseObject interface {
+	VisitUIFindBulkFlagsResponse(w http.ResponseWriter) error
+}
+
+type UIFindBulkFlags200TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIFindBulkFlags200TexthtmlResponse) VisitUIFindBulkFlagsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(200)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIFindBulkFlags400JSONResponse struct {
+	Error *string `json:"error,omitempty"`
+}
+
+func (response UIFindBulkFlags400JSONResponse) VisitUIFindBulkFlagsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(400)
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+type UIFindBulkFlags401TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIFindBulkFlags401TexthtmlResponse) VisitUIFindBulkFlagsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(401)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIFindBulkFlags403TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIFindBulkFlags403TexthtmlResponse) VisitUIFindBulkFlagsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(403)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIFindBulkFlags406TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIFindBulkFlags406TexthtmlResponse) VisitUIFindBulkFlagsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(406)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIFindBulkFlags500TexthtmlResponse struct {
+	Body          io.Reader
+	ContentLength int64
+}
+
+func (response UIFindBulkFlags500TexthtmlResponse) VisitUIFindBulkFlagsResponse(w http.ResponseWriter) error {
+	w.Header().Set("Content-Type", "text/html")
+	if response.ContentLength != 0 {
+		w.Header().Set("Content-Length", fmt.Sprint(response.ContentLength))
+	}
+	w.WriteHeader(500)
+
+	if closer, ok := response.Body.(io.ReadCloser); ok {
+		defer closer.Close()
+	}
+	_, err := io.Copy(w, response.Body)
+	return err
+}
+
+type UIOptionsFindBulkFlagsRequestObject struct {
+}
+
+type UIOptionsFindBulkFlagsResponseObject interface {
+	VisitUIOptionsFindBulkFlagsResponse(w http.ResponseWriter) error
+}
+
+type UIOptionsFindBulkFlags200Response struct {
+}
+
+func (response UIOptionsFindBulkFlags200Response) VisitUIOptionsFindBulkFlagsResponse(w http.ResponseWriter) error {
 	w.WriteHeader(200)
 	return nil
 }
@@ -1907,18 +2480,27 @@ type StrictServerInterface interface {
 	// Check the options for the endpoint
 	// (OPTIONS /healthcheck)
 	OptionsHealthCheck(ctx context.Context, request OptionsHealthCheckRequestObject) (OptionsHealthCheckResponseObject, error)
-	// Get the index.html for the UI
-	// (GET /ui)
-	GetUiIndex(ctx context.Context, request GetUiIndexRequestObject) (GetUiIndexResponseObject, error)
 	// Check the options for the endpoint
-	// (OPTIONS /ui)
-	OptionsUi(ctx context.Context, request OptionsUiRequestObject) (OptionsUiResponseObject, error)
-	// Get the static files for the UI
-	// (GET /ui/{file})
-	GetUiFile(ctx context.Context, request GetUiFileRequestObject) (GetUiFileResponseObject, error)
+	// (OPTIONS /ui/flag)
+	UIOptionsCreateSingleFlag(ctx context.Context, request UIOptionsCreateSingleFlagRequestObject) (UIOptionsCreateSingleFlagResponseObject, error)
+	// create a single flag
+	// (POST /ui/flag)
+	UICreateSingleFlag(ctx context.Context, request UICreateSingleFlagRequestObject) (UICreateSingleFlagResponseObject, error)
+	// delete a single flag
+	// (DELETE /ui/flag/{flag_id})
+	UIKillSingleFlag(ctx context.Context, request UIKillSingleFlagRequestObject) (UIKillSingleFlagResponseObject, error)
 	// Check the options for the endpoint
-	// (OPTIONS /ui/{file})
-	OptionsUiFile(ctx context.Context, request OptionsUiFileRequestObject) (OptionsUiFileResponseObject, error)
+	// (OPTIONS /ui/flag/{flag_id})
+	UIOptionsSingleFlag(ctx context.Context, request UIOptionsSingleFlagRequestObject) (UIOptionsSingleFlagResponseObject, error)
+	// update a single flag
+	// (POST /ui/flag/{flag_id})
+	UIUpdateSingleFlag(ctx context.Context, request UIUpdateSingleFlagRequestObject) (UIUpdateSingleFlagResponseObject, error)
+	// Get bulk list of flags
+	// (GET /ui/flags)
+	UIFindBulkFlags(ctx context.Context, request UIFindBulkFlagsRequestObject) (UIFindBulkFlagsResponseObject, error)
+	// Check the options for the endpoint
+	// (OPTIONS /ui/flags)
+	UIOptionsFindBulkFlags(ctx context.Context, request UIOptionsFindBulkFlagsRequestObject) (UIOptionsFindBulkFlagsResponseObject, error)
 }
 
 type StrictHandlerFunc = strictnethttp.StrictHTTPHandlerFunc
@@ -2410,23 +2992,23 @@ func (sh *strictHandler) OptionsHealthCheck(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-// GetUiIndex operation middleware
-func (sh *strictHandler) GetUiIndex(w http.ResponseWriter, r *http.Request) {
-	var request GetUiIndexRequestObject
+// UIOptionsCreateSingleFlag operation middleware
+func (sh *strictHandler) UIOptionsCreateSingleFlag(w http.ResponseWriter, r *http.Request) {
+	var request UIOptionsCreateSingleFlagRequestObject
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUiIndex(ctx, request.(GetUiIndexRequestObject))
+		return sh.ssi.UIOptionsCreateSingleFlag(ctx, request.(UIOptionsCreateSingleFlagRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetUiIndex")
+		handler = middleware(handler, "UIOptionsCreateSingleFlag")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetUiIndexResponseObject); ok {
-		if err := validResponse.VisitGetUiIndexResponse(w); err != nil {
+	} else if validResponse, ok := response.(UIOptionsCreateSingleFlagResponseObject); ok {
+		if err := validResponse.VisitUIOptionsCreateSingleFlagResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -2434,23 +3016,23 @@ func (sh *strictHandler) GetUiIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// OptionsUi operation middleware
-func (sh *strictHandler) OptionsUi(w http.ResponseWriter, r *http.Request) {
-	var request OptionsUiRequestObject
+// UICreateSingleFlag operation middleware
+func (sh *strictHandler) UICreateSingleFlag(w http.ResponseWriter, r *http.Request) {
+	var request UICreateSingleFlagRequestObject
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.OptionsUi(ctx, request.(OptionsUiRequestObject))
+		return sh.ssi.UICreateSingleFlag(ctx, request.(UICreateSingleFlagRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "OptionsUi")
+		handler = middleware(handler, "UICreateSingleFlag")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(OptionsUiResponseObject); ok {
-		if err := validResponse.VisitOptionsUiResponse(w); err != nil {
+	} else if validResponse, ok := response.(UICreateSingleFlagResponseObject); ok {
+		if err := validResponse.VisitUICreateSingleFlagResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -2458,25 +3040,25 @@ func (sh *strictHandler) OptionsUi(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetUiFile operation middleware
-func (sh *strictHandler) GetUiFile(w http.ResponseWriter, r *http.Request, file File) {
-	var request GetUiFileRequestObject
+// UIKillSingleFlag operation middleware
+func (sh *strictHandler) UIKillSingleFlag(w http.ResponseWriter, r *http.Request, flagId FlagId) {
+	var request UIKillSingleFlagRequestObject
 
-	request.File = file
+	request.FlagId = flagId
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.GetUiFile(ctx, request.(GetUiFileRequestObject))
+		return sh.ssi.UIKillSingleFlag(ctx, request.(UIKillSingleFlagRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "GetUiFile")
+		handler = middleware(handler, "UIKillSingleFlag")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(GetUiFileResponseObject); ok {
-		if err := validResponse.VisitGetUiFileResponse(w); err != nil {
+	} else if validResponse, ok := response.(UIKillSingleFlagResponseObject); ok {
+		if err := validResponse.VisitUIKillSingleFlagResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -2484,25 +3066,101 @@ func (sh *strictHandler) GetUiFile(w http.ResponseWriter, r *http.Request, file 
 	}
 }
 
-// OptionsUiFile operation middleware
-func (sh *strictHandler) OptionsUiFile(w http.ResponseWriter, r *http.Request, file File) {
-	var request OptionsUiFileRequestObject
+// UIOptionsSingleFlag operation middleware
+func (sh *strictHandler) UIOptionsSingleFlag(w http.ResponseWriter, r *http.Request, flagId FlagId) {
+	var request UIOptionsSingleFlagRequestObject
 
-	request.File = file
+	request.FlagId = flagId
 
 	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		return sh.ssi.OptionsUiFile(ctx, request.(OptionsUiFileRequestObject))
+		return sh.ssi.UIOptionsSingleFlag(ctx, request.(UIOptionsSingleFlagRequestObject))
 	}
 	for _, middleware := range sh.middlewares {
-		handler = middleware(handler, "OptionsUiFile")
+		handler = middleware(handler, "UIOptionsSingleFlag")
 	}
 
 	response, err := handler(r.Context(), w, r, request)
 
 	if err != nil {
 		sh.options.ResponseErrorHandlerFunc(w, r, err)
-	} else if validResponse, ok := response.(OptionsUiFileResponseObject); ok {
-		if err := validResponse.VisitOptionsUiFileResponse(w); err != nil {
+	} else if validResponse, ok := response.(UIOptionsSingleFlagResponseObject); ok {
+		if err := validResponse.VisitUIOptionsSingleFlagResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UIUpdateSingleFlag operation middleware
+func (sh *strictHandler) UIUpdateSingleFlag(w http.ResponseWriter, r *http.Request, flagId FlagId) {
+	var request UIUpdateSingleFlagRequestObject
+
+	request.FlagId = flagId
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UIUpdateSingleFlag(ctx, request.(UIUpdateSingleFlagRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UIUpdateSingleFlag")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UIUpdateSingleFlagResponseObject); ok {
+		if err := validResponse.VisitUIUpdateSingleFlagResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UIFindBulkFlags operation middleware
+func (sh *strictHandler) UIFindBulkFlags(w http.ResponseWriter, r *http.Request, params UIFindBulkFlagsParams) {
+	var request UIFindBulkFlagsRequestObject
+
+	request.Params = params
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UIFindBulkFlags(ctx, request.(UIFindBulkFlagsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UIFindBulkFlags")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UIFindBulkFlagsResponseObject); ok {
+		if err := validResponse.VisitUIFindBulkFlagsResponse(w); err != nil {
+			sh.options.ResponseErrorHandlerFunc(w, r, err)
+		}
+	} else if response != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, fmt.Errorf("unexpected response type: %T", response))
+	}
+}
+
+// UIOptionsFindBulkFlags operation middleware
+func (sh *strictHandler) UIOptionsFindBulkFlags(w http.ResponseWriter, r *http.Request) {
+	var request UIOptionsFindBulkFlagsRequestObject
+
+	handler := func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+		return sh.ssi.UIOptionsFindBulkFlags(ctx, request.(UIOptionsFindBulkFlagsRequestObject))
+	}
+	for _, middleware := range sh.middlewares {
+		handler = middleware(handler, "UIOptionsFindBulkFlags")
+	}
+
+	response, err := handler(r.Context(), w, r, request)
+
+	if err != nil {
+		sh.options.ResponseErrorHandlerFunc(w, r, err)
+	} else if validResponse, ok := response.(UIOptionsFindBulkFlagsResponseObject); ok {
+		if err := validResponse.VisitUIOptionsFindBulkFlagsResponse(w); err != nil {
 			sh.options.ResponseErrorHandlerFunc(w, r, err)
 		}
 	} else if response != nil {
@@ -2513,45 +3171,45 @@ func (sh *strictHandler) OptionsUiFile(w http.ResponseWriter, r *http.Request, f
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
-	"/2XJQGYHSQAA",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

@@ -9,8 +9,12 @@ import (
 )
 
 type Querier interface {
+	AddFlag(ctx context.Context, arg AddFlagParams) (FeatureFlag, error)
 	GetFlags(ctx context.Context) ([]GetFlagsRow, error)
-	GetFlagsByEnvironmentName(ctx context.Context, name string) ([]GetFlagsByEnvironmentNameRow, error)
+	GetFlagsByEnvironmentName(ctx context.Context, environmentName string) ([]GetFlagsByEnvironmentNameRow, error)
+	ListEnvironments(ctx context.Context) ([]string, error)
+	PageFlags(ctx context.Context, arg PageFlagsParams) ([]PageFlagsRow, error)
+	SetEnvFlagToDefault(ctx context.Context, arg SetEnvFlagToDefaultParams) error
 }
 
 var _ Querier = (*Queries)(nil)

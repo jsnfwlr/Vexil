@@ -2,7 +2,9 @@ version: "2"
 sql:
   - schema: "migrations"
     queries:
-      - "queries/features.sql"
+      - "queries/flag.sql"
+      - "queries/env_flag.sql"
+      - "queries/environment.sql"
     engine: "postgresql"
     gen:
       go:

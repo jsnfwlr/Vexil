@@ -1,43 +1,51 @@
 package handlers
 
 import (
-	"context"
+	"net/http"
+	"os"
+	"path/filepath"
 
-	"github.com/jsnfwlr/vexil/internal/api/oapi"
+	"github.com/jsnfwlr/o11y"
 )
 
-// GetUiIndex Get the index.html for the UI (GET /ui)
-func (s Server) GetUiIndex(ctx context.Context, r oapi.GetUiIndexRequestObject) (res oapi.GetUiIndexResponseObject, fault error) {
-	return doGetUiIndex(ctx, r)
-}
+// UI inspects the URL path to locate a file within the static dir
+// on the SPA handler. If a file is found, it will be served. If not, the
+// file located at the index path on the SPA handler will be served. This
+// is suitable behavior for serving an SPA (single page application).
+func (h Handlers) UI(w http.ResponseWriter, r *http.Request) {
+	// Join internally call path.Clean to prevent directory traversal
+	path := filepath.Join(h.staticPath, r.URL.Path)
+	_, o := o11y.Get(r.Context(), nil)
 
-func doGetUiIndex(ctx context.Context, r oapi.GetUiIndexRequestObject) (res oapi.GetUiIndexResponseObject, fault error) {
-	return oapi.GetUiIndex200TexthtmlResponse{}, nil
-}
+	o.Debug("static ui request", "file_path", r.URL.String())
 
-// OptionsUi Check the options for the endpoint (OPTIONS /ui)
-func (s Server) OptionsUi(ctx context.Context, r oapi.OptionsUiRequestObject) (res oapi.OptionsUiResponseObject, fault error) {
-	return doOptionsUi(ctx, r)
-}
+	// check whether a file exists or is a directory at the given path
+	fi, err := os.Stat(path)
+	if err != nil {
+		o.Error(err, "file_path", path)
+		if os.IsNotExist(err) {
+			w.WriteHeader(http.StatusNotFound)
+			// file does not exist or path is a directory, serve index.html
+			http.ServeFile(w, r, filepath.Join(h.staticPath, "404.html"))
 
-func doOptionsUi(ctx context.Context, r oapi.OptionsUiRequestObject) (res oapi.OptionsUiResponseObject, fault error) {
-	return oapi.OptionsUi200Response{}, nil
-}
+			return
+		}
 
-// GetUiFile Get the static files for the UI (GET /ui/{file})
-func (s Server) GetUiFile(ctx context.Context, r oapi.GetUiFileRequestObject) (res oapi.GetUiFileResponseObject, fault error) {
-	return doGetUiFile(ctx, r)
-}
+		// if we got an error (that wasn't that the file doesn't exist) stating the
+		// file, return a 500 internal server error and stop
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 
-func doGetUiFile(ctx context.Context, r oapi.GetUiFileRequestObject) (res oapi.GetUiFileResponseObject, fault error) {
-	return oapi.GetUiFile200TexthtmlResponse{}, nil
-}
+		return
+	}
 
-// OptionsUiFile Check the options for the endpoint (OPTIONS /ui/{file})
-func (s Server) OptionsUiFile(ctx context.Context, r oapi.OptionsUiFileRequestObject) (res oapi.OptionsUiFileResponseObject, fault error) {
-	return doOptionsUiFile(ctx, r)
-}
+	o.Debug("requested file", "is_dir", fi.IsDir())
 
-func doOptionsUiFile(ctx context.Context, r oapi.OptionsUiFileRequestObject) (res oapi.OptionsUiFileResponseObject, fault error) {
-	return oapi.OptionsUiFile200Response{}, nil
+	if fi.IsDir() {
+		http.ServeFile(w, r, filepath.Join(h.staticPath, h.indexPath))
+
+		return
+	}
+
+	// otherwise, use http.FileServer to serve the static file
+	http.FileServer(http.Dir(h.staticPath)).ServeHTTP(w, r)
 }

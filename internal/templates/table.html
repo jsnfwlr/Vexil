@@ -1,0 +1,41 @@
+<table width="100%" cellpadding="0" cellspacing="0" id="table">
+    <thead>
+        <tr>
+            <th rowspan="2" class="flag" hx-get="/ui/flags?page={{ .Pages.Page }}&size={{ .Pages.Size }}&sort_by=name&sort_direction={{ if eq .Pages.Sort "name" }}{{ if eq .Pages.Direction "asc" }}desc{{ else }}asc{{ end }}{{ else }}{{ .Pages.Direction }}{{ end }}" hx-trigger="click" hx-swap="outerHTML" hx-target="#table" hx-target-error="#error">Flag{{ if eq .Pages.Sort "name" }}{{ if eq .Pages.Direction "asc" }}A{{else}}D{{end}}{{end}}</th>
+            <th rowspan="2" class="actions">Actions</th>
+            <th rowspan="2" class="type" hx-get="/ui/flags?page={{ .Pages.Page }}&size={{ .Pages.Size }}&sort_by=type&sort_direction={{ if eq .Pages.Sort "type" }}{{ if eq .Pages.Direction "asc" }}desc{{ else }}asc{{ end }}{{ else }}{{ .Pages.Direction }}{{ end }}" hx-trigger="click" hx-swap="outerHTML" hx-target="#table" hx-target-error="#error">Type{{ if eq .Pages.Sort "type" }}{{ if eq .Pages.Direction "asc" }}A{{else}}D{{end}}{{end}}</th>
+            <th rowspan="2" class="default">Default Value</th>
+            <th colspan="{{ (len .Environments) }}" class="env-span">Environments</th>
+        </tr>
+        <tr>
+            {{ range $env := .Environments -}}
+            <th class="env-value">{{ $env }}</th>
+            {{ end -}}
+        </tr>
+    </thead>
+    <tbody>
+        {{- range $row := .Flags }}
+        <tr>
+            <tr id="flag_{{ $row.Id }}">
+                <td class="flag">{{ $row.Name }}</td>
+                <td class="actions"><a hx-get="/ui/flag/{{ $row.Id }}" hx-trigger="click" hx-swap="outerHTML" hx-target="#flag_{{ $row.Id }}" hx-target-error="#error">Edit</a> | <a hx-delete="/ui/flag/{{ $row.Id }}" hx-trigger="click" hx-swap="outerHTML" hx-target="#flag_{{ $row.Id }}" hx-target-error="#error">Delete</a></td>
+                <td class="type">{{ $row.Type }}</td>
+                <td class="default">{{ $row.Default }}</td>
+                {{ range $env := $row.Environments -}}
+                <td class="env-value">{{ $env.Value }}</td>
+                {{ end -}}
+            </tr>
+        </tr>
+        {{ end -}}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="{{ Add (len .Environments) 4}}">
+                {{- range $i := Loop .Pages.Total -}}
+                <a hx-get="/ui/flags?page={{ $i }}&size={{ .Pages.Size }}&sort_by={{ .Pages.Sort }}&sort_direction={{ .Pages.Direction }}" hx-trigger="click" hx-swap="outerHTML" hx-target="#table" hx-target-error="#error">{{ Add $i 1 }}</a>&nbsp;|&nbsp;
+                {{- end -}}
+            </td>
+        </tr>
+    </tfoot>
+</table>
+

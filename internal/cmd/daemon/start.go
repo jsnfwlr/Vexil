@@ -43,7 +43,10 @@ func StartRun(cmd *cobra.Command, args []string) {
 		o.Fatal(err)
 	}
 
-	srvr := api.New(ctx, apiConfig)
+	srvr, err := api.New(ctx, apiConfig)
+	if err != nil {
+		o.Fatal(err)
+	}
 
 	err = srvr.Start(ctx)
 	if err != nil {

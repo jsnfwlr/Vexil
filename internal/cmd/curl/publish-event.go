@@ -1,4 +1,4 @@
-package event
+package curl
 
 import (
 	"bytes"
@@ -11,16 +11,16 @@ import (
 )
 
 func init() {
-	BaseCmd.AddCommand(PublishCmd)
+	BaseCmd.AddCommand(PublishEventCmd)
 }
 
-var PublishCmd = &cobra.Command{
-	Use:   "publish",
-	Short: "run migrations",
-	Run:   PublishRun,
+var PublishEventCmd = &cobra.Command{
+	Use:   "publish-event",
+	Short: "publish a fake flag event",
+	Run:   PublishEventRun,
 }
 
-func PublishRun(cmd *cobra.Command, args []string) {
+func PublishEventRun(cmd *cobra.Command, args []string) {
 	client := &http.Client{}
 
 	flag := handlers.Flag{

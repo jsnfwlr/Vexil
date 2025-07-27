@@ -456,12 +456,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
-                  }
+                 "$ref": "#/components/schemas/error_body"
                 }
               }
             }
@@ -710,6 +705,16 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/error_body"
+                }
+              }
+            }
           }
         }
       }
@@ -819,6 +824,381 @@
         }
       }
     },
+    
+    "/ui/flags":{
+      "options": {
+        "operationId": "UI_options_find_bulk_flags",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "get": {
+        "operationId": "UI_find_bulk_flags",
+        "summary": "Get bulk list of flags",
+        "description": "Get a paginated bulk list of flags, with search filter and ability to list deleted flags.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/pagination_page_number"
+          },
+          {
+            "$ref": "#/components/parameters/pagination_page_size"
+          },
+          {
+            "$ref": "#/components/parameters/pagination_sort_by"
+          },
+          {
+            "$ref": "#/components/parameters/pagination_sort_direction"
+          },
+          {
+            "$ref": "#/components/parameters/filter_by_name"
+          },
+          {
+            "$ref": "#/components/parameters/filter_by_type"
+          },
+          {
+            "$ref": "#/components/parameters/filter_by_environment"
+          },
+          {
+            "$ref": "#/components/parameters/filter_by_state"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Records retrieved successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "Not Acceptable - No records found matching the filter criteria",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to list flags",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui/flag":{
+      "options": {
+        "operationId": "UI_options_create_single_flag",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "post": {
+        "operationId": "UI_create_single_flag",
+        "summary": "create a single flag",
+        "description": "Create a new flag with the values provided",
+        "responses": {
+          "200": {
+            "description": "Record created successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to create flags",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ui/flag/{flag_id}":{
+      "options": {
+        "operationId": "UI_options_single_flag",
+        "summary": "Check the options for the endpoint",
+        "description": "This endpoint is used to check the options for the endpoint.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/flag_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Options retrieved successfully"
+          }
+        }
+      },
+      "post": {
+        "operationId": "UI_update_single_flag",
+        "summary": "update a single flag",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/flag_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Record updated successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "Not Acceptable - No records found matching the flag id",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to modify flags",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "UI_kill_single_flag",
+        "summary": "delete a single flag",
+        "description": "",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/flag_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Record deleted successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "Not Acceptable - No records found matching the flag id",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - User does not have permission to delete flags",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - User is not authenticated",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthcheck": {
       "options": {
         "operationId": "options_health_check",
@@ -850,112 +1230,17 @@
           }
         }
       }
-    },
-    "/ui": {
-      "options": {
-        "operationId": "options_ui",
-        "summary": "Check the options for the endpoint",
-        "description": "This endpoint is used to check the options for the endpoint.",
-        "responses": {
-          "200": {
-            "description": "Options retrieved successfully"
-          }
-        }
-      },
-      "get": {
-        "operationId": "get_ui_index",
-        "summary": "Get the index.html for the UI",
-        "description": "Serve the static index.html for the Web UI",
-        "responses": {
-          "200": {
-            "description": "UI retrieved successfully",
-            "content": {
-              "text/html": {
-                "schema": {
-                  "type": "string",
-                  "format": "html"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_body"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/ui/{file}": {
-      "options": {
-        "operationId": "options_ui_file",
-        "summary": "Check the options for the endpoint",
-        "description": "This endpoint is used to check the options for the endpoint.",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/file"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Options retrieved successfully"
-          }
-        }
-      },
-      "get": {
-        "operationId": "get_ui_file",
-        "summary": "Get the static files for the UI",
-        "description": "Serve the static files for the Web UI",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/file"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "UI retrieved successfully",
-            "content": {
-              "text/html": {
-                "schema": {
-                  "type": "string",
-                  "format": "html"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_body"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found - The requested UI resource does not exist",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/error_body"
-                }
-              }
-            }
-          }
-        }
-      }
     }
+    
   },
   "components": {
     "schemas": {
       "error_body": {
         "type": "object",
+        "required": [
+          "error",
+          "error_code"
+        ],
         "properties": {
           "error": {
             "type": "string",
@@ -992,7 +1277,7 @@
           "name": {
             "type": "string"
           },
-          "flag_type": {
+          "type": {
             "$ref": "#/components/schemas/flag_type"
           },
           "default_value": {
@@ -1120,12 +1405,8 @@
           "enum": [
             "name",
             "type",
-            "value",
-            "default_value",
-            "environment",
             "created_at",
-            "updated_at",
-            "deleted_at"
+            "updated_at"
           ]
         },
         "description": "Sort by field for the pagination. If not provided, defaults to 'name'."
