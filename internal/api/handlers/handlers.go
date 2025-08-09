@@ -2,16 +2,13 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"net/http"
 
 	"github.com/jsnfwlr/o11y"
 	"github.com/jsnfwlr/vexil/internal/api/oapi"
 	"github.com/jsnfwlr/vexil/internal/db"
-	"github.com/jsnfwlr/vexil/internal/log"
 	"github.com/r3labs/sse/v2"
+	otelTrace "go.opentelemetry.io/otel/trace"
 )
 
 type Handlers struct {
@@ -30,8 +27,10 @@ type Flag struct {
 
 func New(ctx context.Context, dbClient *db.Client, enableSSE bool, staticPath, indexPath string) (handlers Handlers, fault error) {
 	var eventSrv *sse.Server
+	ctx, span := tracer.Start(ctx, "New", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
 
-	ctx, o := o11y.Get(ctx, nil)
+	o := o11y.Get(ctx)
 
 	if enableSSE {
 		eventSrv = sse.NewWithCallback(AddSub, RemSub)
@@ -42,7 +41,7 @@ func New(ctx context.Context, dbClient *db.Client, enableSSE bool, staticPath, i
 			return Handlers{}, err
 		}
 		for _, e := range envs {
-			o.Info("creating environment stream", "environment", e)
+			o.Info("creating environment stream", span, "environment", e)
 			eventSrv.CreateStream(e)
 		}
 	}
@@ -80,51 +79,6 @@ func (h Handlers) HealthCheck(ctx context.Context, r oapi.HealthCheckRequestObje
 // OptionsHealthCheck checks the options for the endpoint (OPTIONS /healthcheck)
 func (h Handlers) OptionsHealthCheck(ctx context.Context, r oapi.OptionsHealthCheckRequestObject) (res oapi.OptionsHealthCheckResponseObject, fault error) {
 	return doOptionsHealthCheck(ctx, r)
-}
-
-func (h Handlers) Events(w http.ResponseWriter, r *http.Request) {
-	if h.EventSrv == nil {
-		return
-	}
-
-	_, o := o11y.Get(r.Context(), nil)
-	// ctx, o := o11y.Get(tracer.Start(r.Context(), "Events", trace.WithSpanKind(trace.SpanKindServer)))
-	defer o.End()
-
-	o.Debug("Client connected to stream")
-
-	go func() {
-		// Received Browser Disconnection
-		<-r.Context().Done()
-	}()
-
-	h.EventSrv.ServeHTTP(w, r)
-}
-
-func (h Handlers) SendEvent(ctx context.Context, environment string, flag Flag) error {
-	_, o := o11y.Get(ctx, nil)
-
-	if h.EventSrv == nil {
-		return errors.New("server is not enabled for SSE")
-	}
-
-	data, err := json.Marshal(flag)
-	if err != nil {
-		return fmt.Errorf("could not convert flag to json string: %w", err)
-	}
-
-	event := sse.Event{
-		Data: data,
-	}
-
-	ok := h.EventSrv.TryPublish(environment, &event)
-	if !ok {
-		o.Debug("PublishEvent failed", log.RequestIdKey, o11y.GetRequestID(ctx))
-		return fmt.Errorf("could not publish %s flag %s to %s", flag.Type, flag.Name, environment)
-	}
-	o.Debug("PublishEvent succeeded", log.RequestIdKey, o11y.GetRequestID(ctx))
-
-	return nil
 }
 
 // GetFlagsByEnvironment Get flags by environment (GET /api/environment/{environment_name}/flag)

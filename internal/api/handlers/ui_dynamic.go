@@ -13,6 +13,7 @@ import (
 	"github.com/jsnfwlr/vexil/internal/api/oapi"
 	"github.com/jsnfwlr/vexil/internal/db"
 	"github.com/jsnfwlr/vexil/internal/templates"
+	otelTrace "go.opentelemetry.io/otel/trace"
 )
 
 type Table struct {
@@ -43,8 +44,11 @@ type FindBulkFlagsQueryProvider interface {
 }
 
 func doUIFindBulkFlags(ctx context.Context, dbClient FindBulkFlagsQueryProvider, r oapi.UIFindBulkFlagsRequestObject) (res oapi.UIFindBulkFlagsResponseObject, fault error) {
-	_, o := o11y.Get(ctx, nil)
-	o.Info("getting flag table")
+	ctx, span := tracer.Start(ctx, "doUIFindBulkFlags", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
+
+	o := o11y.Get(ctx)
+	o.Debug("getting flag table", span)
 
 	var b []byte
 	var op io.Reader
@@ -123,7 +127,7 @@ func doUIFindBulkFlags(ctx context.Context, dbClient FindBulkFlagsQueryProvider,
 	tmpl, err := template.New("table.html").Funcs(funcs).ParseFS(templates.Files, "table.html")
 	if err != nil {
 		b = []byte(fmt.Sprintf(`<div id="error">Could not read template: %s</div>`, err))
-		o.Error(err)
+		o.Error(err, span)
 		op = bytes.NewReader(b)
 		return oapi.UIFindBulkFlags500TexthtmlResponse{Body: op, ContentLength: int64(len(b))}, nil
 	}
@@ -133,7 +137,7 @@ func doUIFindBulkFlags(ctx context.Context, dbClient FindBulkFlagsQueryProvider,
 	err = tmpl.Execute(ip, data)
 	if err != nil {
 		b = []byte(fmt.Sprintf(`<div id="error">Could not render template: %s</div>`, err))
-		o.Error(err)
+		o.Error(err, span)
 		op = bytes.NewReader(b)
 		return oapi.UIFindBulkFlags500TexthtmlResponse{Body: op, ContentLength: int64(len(b))}, nil
 	}
@@ -147,27 +151,45 @@ func doUIFindBulkFlags(ctx context.Context, dbClient FindBulkFlagsQueryProvider,
 }
 
 func doUICreateSingleFlag(ctx context.Context, r oapi.UICreateSingleFlagRequestObject) (res oapi.UICreateSingleFlagResponseObject, fault error) {
+	ctx, span := tracer.Start(ctx, "doUICreateSingleFlag", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
+
 	return oapi.UICreateSingleFlag200TexthtmlResponse{}, nil
 }
 
 func doUIUpdateSingleFlag(ctx context.Context, r oapi.UIUpdateSingleFlagRequestObject) (res oapi.UIUpdateSingleFlagResponseObject, fault error) {
+	ctx, span := tracer.Start(ctx, "doUIUpdateSingleFlag", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
+
 	return oapi.UIUpdateSingleFlag200TexthtmlResponse{}, nil
 }
 
 func doUIKillSingleFlag(ctx context.Context, r oapi.UIKillSingleFlagRequestObject) (res oapi.UIKillSingleFlagResponseObject, fault error) {
+	ctx, span := tracer.Start(ctx, "doUIKillSingleFlag", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
+
 	return oapi.UIKillSingleFlag200TexthtmlResponse{}, nil
 }
 
 // OPTIONS
 
 func doUIOptionsFindFlags(ctx context.Context, r oapi.UIOptionsFindBulkFlagsRequestObject) (res oapi.UIOptionsFindBulkFlagsResponseObject, fault error) {
+	ctx, span := tracer.Start(ctx, "doUIOptionsFindFlags", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
+
 	return oapi.UIOptionsFindBulkFlags200Response{}, nil
 }
 
 func doUIOptionsCreateSingleFlag(ctx context.Context, r oapi.UIOptionsCreateSingleFlagRequestObject) (res oapi.UIOptionsCreateSingleFlagResponseObject, fault error) {
+	ctx, span := tracer.Start(ctx, "doUIOptionsCreateSingleFlag", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
+
 	return oapi.UIOptionsCreateSingleFlag200Response{}, nil
 }
 
 func doUIOptionsSingleFlag(ctx context.Context, r oapi.UIOptionsSingleFlagRequestObject) (res oapi.UIOptionsSingleFlagResponseObject, fault error) {
+	ctx, span := tracer.Start(ctx, "doUIOptionsSingleFlag", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
+
 	return oapi.UIOptionsSingleFlag200Response{}, nil
 }

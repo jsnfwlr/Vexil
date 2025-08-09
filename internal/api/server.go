@@ -8,9 +8,10 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"go.opentelemetry.io/otel"
+	otelTrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/jsnfwlr/o11y"
-
 	"github.com/jsnfwlr/vexil/internal/api/handlers"
 	"github.com/jsnfwlr/vexil/internal/api/oapi"
 	"github.com/jsnfwlr/vexil/internal/log"
@@ -26,11 +27,14 @@ type Server struct {
 	server *http.Server
 }
 
+var tracer = otel.Tracer("github.com/jsnfwlr/vexil/internal/api")
+
 func errorHandler(w http.ResponseWriter, r *http.Request, err error) {
 	var body []byte
+	ctx, span := tracer.Start(r.Context(), "errorHandler", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
 
-	ctx := r.Context()
-	ctx, o := o11y.Get(ctx, nil)
+	o := o11y.Get(ctx)
 
 	e := StatusError{}
 
@@ -42,13 +46,15 @@ func errorHandler(w http.ResponseWriter, r *http.Request, err error) {
 
 	body, _ = json.Marshal(e)
 
-	o.Error(errors.New("error handling request"), log.RequestBodyKey, string(body))
+	o.Error(errors.New("error handling request"), span, log.RequestBodyKey, string(body))
 
 	http.Error(w, string(body), e.Code)
 }
 
 func New(ctx context.Context, cfg Config) (server Server, fault error) {
 	r := mux.NewRouter()
+	ctx, span := tracer.Start(ctx, "New", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
 
 	mw := []mux.MiddlewareFunc{
 		o11y.SetRequestID,
@@ -57,8 +63,8 @@ func New(ctx context.Context, cfg Config) (server Server, fault error) {
 
 	r.Use(mw...)
 
-	_, o := o11y.Get(ctx, nil)
-	o.Debug("creating base router")
+	o := o11y.Get(ctx)
+	o.Debug("creating base router", span)
 
 	h, err := handlers.New(ctx, cfg.DBClient, cfg.EnableSSE, "static", "index.html")
 	if err != nil {
@@ -71,7 +77,7 @@ func New(ctx context.Context, cfg Config) (server Server, fault error) {
 	})
 
 	if cfg.EnableSSE {
-		o.Debug("enabling server-sent events")
+		o.Debug("enabling server-sent events", span)
 		r.HandleFunc("/api/events", h.Events)
 		r.HandleFunc("/api/event", h.PublishEvent)
 	}
@@ -96,8 +102,12 @@ func New(ctx context.Context, cfg Config) (server Server, fault error) {
 }
 
 func (srvr *Server) Start(ctx context.Context) error {
-	_, o := o11y.Get(ctx, nil)
-	o.Info("starting server", "address", Address, "port", Port)
+	ctx, span := tracer.Start(ctx, "errorHandler", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
+
+	o := o11y.Get(ctx)
+
+	o.Info("starting server", span, "address", Address, "port", Port)
 	err := srvr.server.ListenAndServe()
 	if err != nil {
 		return err

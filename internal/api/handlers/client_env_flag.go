@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	otelTrace "go.opentelemetry.io/otel/trace"
+
 	"github.com/jsnfwlr/o11y"
 	"github.com/jsnfwlr/vexil/internal/api/oapi"
 	"github.com/jsnfwlr/vexil/internal/db"
@@ -18,11 +20,14 @@ type FlagsByEnvQueryProvider interface {
 func doGetFlagsByEnvironment(ctx context.Context, q FlagsByEnvQueryProvider, r oapi.GetFlagsByEnvironmentRequestObject) (res oapi.GetFlagsByEnvironmentResponseObject, fault error) {
 	var out oapi.GetFlagsByEnvironment200JSONResponse
 
-	ctx, o := o11y.Get(ctx, nil)
+	ctx, span := tracer.Start(ctx, "doGetFlagsByEnvironment", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
+
+	o := o11y.Get(ctx)
 
 	rows, err := q.GetFlagsByEnvironmentName(ctx, r.EnvironmentName)
 	if err != nil {
-		o.Error(err, log.EnvironmentNameKey, r.EnvironmentName)
+		o.Error(err, span, log.EnvironmentNameKey, r.EnvironmentName)
 		return oapi.GetFlagsByEnvironment400JSONResponse{
 			Error:     err.Error(),
 			ErrorCode: http.StatusBadRequest,
@@ -40,7 +45,7 @@ func doGetFlagsByEnvironment(ctx context.Context, q FlagsByEnvQueryProvider, r o
 	for _, f := range rows {
 		vt, err := f.FeatureFlag.ValueType.ToAPIEnum()
 		if err != nil {
-			o.Error(err, log.EnvironmentNameKey, r.EnvironmentName)
+			o.Error(err, span, log.EnvironmentNameKey, r.EnvironmentName)
 			return oapi.GetFlagsByEnvironment500JSONResponse{
 				Error:     err.Error(),
 				ErrorCode: http.StatusInternalServerError,
@@ -59,5 +64,8 @@ func doGetFlagsByEnvironment(ctx context.Context, q FlagsByEnvQueryProvider, r o
 }
 
 func doOptionsEnvironmentNameFlag(ctx context.Context, r oapi.OptionsEnvironmentNameFlagRequestObject) (res oapi.OptionsEnvironmentNameFlagResponseObject, fault error) {
+	ctx, span := tracer.Start(ctx, "doOptionsEnvironmentNameFlag", otelTrace.WithSpanKind(otelTrace.SpanKindServer))
+	defer span.End()
+
 	return oapi.OptionsEnvironmentNameFlag200Response{}, nil
 }

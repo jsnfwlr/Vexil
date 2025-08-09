@@ -2,9 +2,9 @@ package daemon
 
 import (
 	"github.com/spf13/cobra"
+	otelTrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/jsnfwlr/o11y"
-
 	"github.com/jsnfwlr/vexil/internal/api"
 	"github.com/jsnfwlr/vexil/internal/db"
 )
@@ -20,18 +20,20 @@ var StartCmd = &cobra.Command{
 }
 
 func StartRun(cmd *cobra.Command, args []string) {
-	ctx, o := o11y.Get(cmd.Context(), nil)
+	ctx, span := tracer.Start(cmd.Context(), "start", otelTrace.WithSpanKind(otelTrace.SpanKindClient))
+	defer span.End()
 
-	o.Info("starting vexil daemon")
+	o := o11y.Get(ctx)
+	o.Info("starting vexil daemon", span)
 
 	dbConfig, err := db.LoadConfig()
 	if err != nil {
-		o.Fatal(err)
+		o.Fatal(err, span)
 	}
 
 	dbClient, err := db.Connect(ctx, dbConfig)
 	if err != nil {
-		o.Fatal(err)
+		o.Fatal(err, span)
 	}
 
 	defer func() {
@@ -40,16 +42,16 @@ func StartRun(cmd *cobra.Command, args []string) {
 
 	apiConfig, err := api.LoadConfig(dbClient)
 	if err != nil {
-		o.Fatal(err)
+		o.Fatal(err, span)
 	}
 
 	srvr, err := api.New(ctx, apiConfig)
 	if err != nil {
-		o.Fatal(err)
+		o.Fatal(err, span)
 	}
 
 	err = srvr.Start(ctx)
 	if err != nil {
-		o.Fatal(err)
+		o.Fatal(err, span)
 	}
 }

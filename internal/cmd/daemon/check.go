@@ -5,15 +5,12 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
-	"go.opentelemetry.io/otel"
 	otelTrace "go.opentelemetry.io/otel/trace"
 
 	"github.com/jsnfwlr/vexil/internal/log"
 
 	"github.com/jsnfwlr/o11y"
 )
-
-var tracer = otel.Tracer("github.com/jsnfwlr/vexil/cmd/daemon")
 
 func init() {
 	BaseCmd.AddCommand(CheckCmd)
@@ -26,24 +23,24 @@ var CheckCmd = &cobra.Command{
 }
 
 func CheckRun(cmd *cobra.Command, args []string) {
-	_, o := o11y.Get(tracer.Start(cmd.Context(), "healthcheck", otelTrace.WithSpanKind(otelTrace.SpanKindClient)))
+	ctx, span := tracer.Start(cmd.Context(), "healthcheck", otelTrace.WithSpanKind(otelTrace.SpanKindClient))
+	defer span.End()
 
-	defer o.End()
-
-	o.Debug("checking vexil daemon")
+	o := o11y.Get(ctx)
+	o.Debug("checking vexil daemon", span)
 
 	client := &http.Client{
 		Transport: http.DefaultTransport,
 	}
 	err := o11y.AddLoggingToHTTPClient(client)
 	if err != nil {
-		o.Error(err)
+		o.Error(err, span)
 		return
 	}
 
 	req, err := http.NewRequest(http.MethodGet, "http://localhost:9765/ping", nil)
 	if err != nil {
-		o.Error(err)
+		o.Error(err, span)
 		return
 	}
 
@@ -52,12 +49,12 @@ func CheckRun(cmd *cobra.Command, args []string) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		o.Error(err)
+		o.Error(err, span)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		o.Error(errors.New("healthcheck encountered invalid status code"), log.StatusCodeKey, resp.StatusCode)
+		o.Error(errors.New("healthcheck encountered invalid status code"), span, log.StatusCodeKey, resp.StatusCode)
 	}
 
-	o.Debug("vexil daemon is running", log.StatusCodeKey, resp.StatusCode)
+	o.Debug("vexil daemon is running", span, log.StatusCodeKey, resp.StatusCode)
 }

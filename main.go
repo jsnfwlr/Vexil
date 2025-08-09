@@ -8,12 +8,13 @@ import (
 	"os"
 
 	"github.com/jsnfwlr/o11y"
+	"github.com/jsnfwlr/o11y/config"
 
 	"github.com/jsnfwlr/vexil/internal/cmd"
 )
 
 func main() {
-	cfg, err := o11y.LoadConfig()
+	cfg, err := config.Load()
 	if err != nil {
 		panic(err)
 	}
